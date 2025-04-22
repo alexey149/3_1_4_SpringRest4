@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <title>Форма пользователя</title>
+</head>
+<body>
+<div sec:authorize="isAuthenticated()">
+  <form th:action="@{/logout}" method="post">
+    <button type="submit">Выйти</button>
+  </form>
+</div>
+
+<h2 th:if="${user.id == 0}">Добавление нового пользователя</h2>
+<h2 th:unless="${user.id == 0}">Редактирование пользователя</h2>
+
+<form th:method="post" th:action="${user.id == 0 ? '/admin/saveUser' : '/admin/updateUser'}" th:object="${user}">
+  <input type="hidden" th:field="*{id}"/>
+
+  <div>
+    <label for="name">Имя:</label>
+    <input type="text" th:field="*{name}" id="name"/>
+    <br/>
+    <span style="color:red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+  </div>
+
+  <div>
+    <label for="surname">Фамилия:</label>
+    <input type="text" th:field="*{sureName}" id="surname"/>
+    <br/>
+    <span style="color:red;" th:if="${#fields.hasErrors('sureName')}" th:errors="*{sureName}"></span>
+  </div>
+
+  <div>
+    <label for="username">Логин:</label>
+    <input type="text" th:field="*{username}" id="username"/>
+    <br/>
+    <span style="color:red;" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+  </div>
+
+  <div>
+    <label for="password">Пароль:</label>
+    <input type="password" th:field="*{password}" id="password"/>
+    <br/>
+    <span style="color:red;" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+  </div>
+
+  <div>
+    <label>Роли:</label>
+    <div th:each="role : ${roles}">
+      <label>
+        <input type="checkbox" name="selectedRoles" th:value="${role.name}"
+               th:checked="${user.roles != null && user.roles.contains(role)}"/>
+        <span th:text="${role.name}"></span>
+      </label>
+    </div>
+  </div>
+
+  <input type="submit" value="Сохранить"/>
+</form>
+
+<p><a th:href="@{/admin}">Вернуться к списку пользователей</a></p>
+</body>
+</html>
