@@ -3,63 +3,132 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
   <meta charset="UTF-8">
-  <title>Форма пользователя</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Управление пользователем</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div sec:authorize="isAuthenticated()">
-  <form th:action="@{/logout}" method="post">
-    <button type="submit">Выйти</button>
-  </form>
-</div>
-
-<h2 th:if="${user.id == 0}">Добавление нового пользователя</h2>
-<h2 th:unless="${user.id == 0}">Редактирование пользователя</h2>
-
-<form th:method="post" th:action="${user.id == 0 ? '/admin/saveUser' : '/admin/updateUser'}" th:object="${user}">
-  <input type="hidden" th:field="*{id}"/>
-
-  <div>
-    <label for="name">Имя:</label>
-    <input type="text" th:field="*{name}" id="name"/>
-    <br/>
-    <span style="color:red;" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
-  </div>
-
-  <div>
-    <label for="surname">Фамилия:</label>
-    <input type="text" th:field="*{sureName}" id="surname"/>
-    <br/>
-    <span style="color:red;" th:if="${#fields.hasErrors('sureName')}" th:errors="*{sureName}"></span>
-  </div>
-
-  <div>
-    <label for="username">Логин:</label>
-    <input type="text" th:field="*{username}" id="username"/>
-    <br/>
-    <span style="color:red;" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
-  </div>
-
-  <div>
-    <label for="password">Пароль:</label>
-    <input type="password" th:field="*{password}" id="password"/>
-    <br/>
-    <span style="color:red;" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
-  </div>
-
-  <div>
-    <label>Роли:</label>
-    <div th:each="role : ${roles}">
-      <label>
-        <input type="checkbox" name="selectedRoles" th:value="${role.name}"
-               th:checked="${user.roles != null && user.roles.contains(role)}"/>
-        <span th:text="${role.name}"></span>
-      </label>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">Spring Boot CRUD</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">Главная</a>
+        </li>
+        <li class="nav-item active" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link" th:href="@{/admin}">Админ панель</a>
+        </li>
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+          <a class="nav-link" th:href="@{/user}">Личный кабинет</a>
+        </li>
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+          <form th:action="@{/logout}" method="post" class="form-inline">
+            <button type="submit" class="btn btn-outline-light">Выход</button>
+          </form>
+        </li>
+      </ul>
     </div>
   </div>
+</nav>
 
-  <input type="submit" value="Сохранить"/>
-</form>
+<div class="container main-container">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h4 th:if="${user.id == 0}">Добавление нового пользователя</h4>
+          <h4 th:unless="${user.id == 0}">Редактирование пользователя</h4>
+        </div>
+        <div class="card-body">
+          <form th:method="post" th:action="${user.id == 0 ? '/admin/saveUser' : '/admin/updateUser'}" th:object="${user}" class="needs-validation">
+            <input type="hidden" th:field="*{id}"/>
 
-<p><a th:href="@{/admin}">Вернуться к списку пользователей</a></p>
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="name">Имя:</label>
+                  <input type="text" th:field="*{name}" id="name" class="form-control"
+                         th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''"/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="surname">Фамилия:</label>
+                  <input type="text" th:field="*{sureName}" id="surname" class="form-control"
+                         th:classappend="${#fields.hasErrors('sureName')} ? 'is-invalid' : ''"/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('sureName')}" th:errors="*{sureName}"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="username">Логин:</label>
+                  <input type="text" th:field="*{username}" id="username" class="form-control"
+                         th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''"/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></div>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="password">Пароль:</label>
+                  <input type="password" th:field="*{password}" id="password" class="form-control"
+                         th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''"/>
+                  <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                  <small class="form-text text-muted" th:if="${user.id != 0}">Оставьте поле пустым, если не хотите менять пароль</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Роли:</label>
+              <div class="card">
+                <div class="card-body">
+                  <div class="custom-control custom-checkbox" th:each="role : ${roles}">
+                    <input type="checkbox" class="custom-control-input" name="selectedRoles"
+                           th:id="${'role_' + role.id}" th:value="${role.name}"
+                           th:checked="${user.roles != null && user.roles.contains(role)}"/>
+                    <label class="custom-control-label" th:for="${'role_' + role.id}" th:text="${role.name}"></label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group d-flex justify-content-between mt-4">
+              <a th:href="@{/admin}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Вернуться к списку
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-lg"></i> Сохранить
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container text-center">
+    <p>Spring Boot CRUD Application &copy; 2025</p>
+  </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -4,34 +4,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Главная страница</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div>
-    <th:block th:each="msg : ${messages}">
-        <h1 th:text="${msg}"></h1>
-    </th:block>
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">Spring Boot CRUD</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" th:href="@{/}">Главная</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}">Админ панель</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/user}">Личный кабинет</a>
+                </li>
+                <li class="nav-item" sec:authorize="!isAuthenticated()">
+                    <a class="nav-link" th:href="@{/login}">Вход</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <form th:action="@{/logout}" method="post" class="form-inline">
+                        <button type="submit" class="btn btn-outline-light">Выход</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container main-container">
+    <div class="jumbotron text-center">
+        <h1 class="display-4">Добро пожаловать в Spring Boot CRUD</h1>
+        <div class="mt-4">
+            <th:block th:each="msg : ${messages}">
+                <p class="lead" th:text="${msg}"></p>
+            </th:block>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="d-flex flex-column align-items-center" sec:authorize="isAuthenticated()">
+            <div class="mb-3">
+                <p>Вы вошли как: <strong sec:authentication="name"></strong></p>
+                <p>Ваши роли: <span sec:authentication="principal.authorities"></span></p>
+            </div>
+
+            <div class="btn-group">
+                <a th:href="@{/user}" class="btn btn-primary mr-2">
+                    <i class="bi bi-person"></i> Личный кабинет
+                </a>
+                <a th:href="@{/admin}" class="btn btn-warning" sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-gear"></i> Админ панель
+                </a>
+            </div>
+        </div>
+
+        <div sec:authorize="!isAuthenticated()">
+            <p class="lead">Для доступа к возможностям системы, пожалуйста, войдите</p>
+            <a th:href="@{/login}" class="btn btn-primary btn-lg">
+                <i class="bi bi-box-arrow-in-right"></i> Войти
+            </a>
+        </div>
+    </div>
 </div>
 
-<div sec:authorize="isAuthenticated()">
-    <div>
-        <span>Вы вошли как: </span>
-        <span sec:authentication="name"></span>
-        <span sec:authentication="principal.authorities"></span>
+<footer class="footer">
+    <div class="container text-center">
+        <p>Spring Boot CRUD Application &copy; 2025</p>
     </div>
-    <div>
-        <a th:href="@{/user}">Личный кабинет</a>
-    </div>
-    <div sec:authorize="hasRole('ADMIN')">
-        <a th:href="@{/admin}">Админ панель</a>
-    </div>
-    <form th:action="@{/logout}" method="post">
-        <button type="submit">Выйти</button>
-    </form>
-</div>
+</footer>
 
-<div sec:authorize="!isAuthenticated()">
-    <a th:href="@{/login}">Войти</a>
-</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>

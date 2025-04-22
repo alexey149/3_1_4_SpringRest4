@@ -2,54 +2,109 @@
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-  <title>Admin Panel - Users</title>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Админ панель - Пользователи</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body>
-<div sec:authorize="isAuthenticated()">
-  <form th:action="@{/logout}" method="post">
-    <button type="submit">Выйти</button>
-  </form>
+<nav class="navbar navbar-expand-lg navbar-dark">
+  <div class="container">
+    <a class="navbar-brand" href="#">Spring Boot CRUD</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" th:href="@{/}">Главная</a>
+        </li>
+        <li class="nav-item active" sec:authorize="hasRole('ADMIN')">
+          <a class="nav-link" th:href="@{/admin}">Админ панель</a>
+        </li>
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+          <a class="nav-link" th:href="@{/user}">Личный кабинет</a>
+        </li>
+        <li class="nav-item" sec:authorize="isAuthenticated()">
+          <form th:action="@{/logout}" method="post" class="form-inline">
+            <button type="submit" class="btn btn-outline-light">Выход</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container main-container">
+  <div class="page-header d-flex justify-content-between align-items-center">
+    <h2>Управление пользователями</h2>
+    <a th:href="@{/admin/addNewUser}" class="btn btn-primary">
+      <i class="bi bi-person-plus"></i> Добавить пользователя
+    </a>
+  </div>
+
+  <div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h4 class="mb-0">Список пользователей</h4>
+      <span class="badge badge-pill badge-light" th:text="${#lists.size(users)} + ' пользователей'"></span>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead class="thead-light">
+          <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Фамилия</th>
+            <th>Логин</th>
+            <th>Роли</th>
+            <th>Действия</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.name}"></td>
+            <td th:text="${user.sureName}"></td>
+            <td th:text="${user.username}"></td>
+            <td>
+              <th:block th:if="${user.roles != null}">
+                <span th:each="role : ${user.roles}" class="badge badge-pill badge-primary" th:text="${role.name}"></span>
+              </th:block>
+            </td>
+            <td>
+              <a th:href="@{/admin/updateInfo(userId=${user.id})}" class="btn btn-sm btn-warning">
+                <i class="bi bi-pencil-square"></i> Изменить
+              </a>
+              <a th:href="@{/admin/deleteUser(userId=${user.id})}" class="btn btn-sm btn-danger"
+                 onclick="return confirm('Вы уверены, что хотите удалить этого пользователя?')">
+                <i class="bi bi-trash"></i> Удалить
+              </a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div th:if="${#lists.isEmpty(users)}" class="alert alert-info mt-3">
+        <i class="bi bi-info-circle"></i> Пользователи не найдены.
+      </div>
+    </div>
+  </div>
 </div>
 
-<h2>Список пользователей</h2>
-<br>
-<table border="1">
-  <thead>
-  <tr>
-    <th>ID</th>
-    <th>Имя</th>
-    <th>Фамилия</th>
-    <th>Логин</th>
-    <th>Роли</th>
-    <th>Действия</th>
-  </tr>
-  </thead>
-  <tbody>
-  <tr th:each="user : ${users}">
-    <td th:text="${user.id}"></td>
-    <td th:text="${user.name}"></td>
-    <td th:text="${user.sureName}"></td>
-    <td th:text="${user.username}"></td>
-    <td>
-                    <span th:each="role, iterStat : ${user.roles}">
-                        <span th:text="${role.name}"></span>
-                        <span th:if="${!iterStat.last}">, </span>
-                    </span>
-    </td>
-    <td>
-      <a th:href="@{/admin/updateInfo(userId=${user.id})}">Изменить</a>
-      <a th:href="@{/admin/deleteUser(userId=${user.id})}">Удалить</a>
-    </td>
-  </tr>
-  </tbody>
-</table>
-<br/>
-<a th:href="@{/admin/addNewUser}">Добавить пользователя</a>
-<div th:if="${#lists.isEmpty(users)}">
-  <p>Пользователи не найдены.</p>
-</div>
+<footer class="footer">
+  <div class="container text-center">
+    <p>Spring Boot CRUD Application &copy; 2025</p>
+  </div>
+</footer>
 
-<p><a th:href="@{/user}">Перейти на страницу пользователя</a></p>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
