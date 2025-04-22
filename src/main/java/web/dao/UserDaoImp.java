@@ -1,14 +1,11 @@
 package web.dao;
 
-
-import org.hibernate.Session;
 import org.springframework.stereotype.Repository;
 import web.model.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import java.util.List;
-import java.util.logging.Logger;
 
 @Repository
 public class UserDaoImp implements UserDao {
@@ -26,13 +23,11 @@ public class UserDaoImp implements UserDao {
     }
 
     public void save(User user) {
-       if(user.getId() == 0) {
-           entityManager.persist(user);
-       }else {
-           entityManager.merge(user);
-       }
-
-
+        if(user.getId() == 0) {
+            entityManager.persist(user);
+        } else {
+            entityManager.merge(user);
+        }
     }
 
     public void update(User user) {
