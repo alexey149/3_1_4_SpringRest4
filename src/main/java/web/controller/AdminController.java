@@ -86,6 +86,9 @@ public class AdminController {
                 roles.add(roleService.getRoleByName(roleName));
             }
             user.setRoles(roles);
+        } else {
+            // Если роли не выбраны, установим пустой набор
+            user.setRoles(new HashSet<>());
         }
 
         userService.save(user);
