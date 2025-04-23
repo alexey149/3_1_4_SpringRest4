@@ -28,23 +28,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Создаем роли, если их нет
-        Role adminRole = roleService.getRoleByName("ROLE_ADMIN");
-        if (adminRole == null) {
-            adminRole = new Role("ROLE_ADMIN");
+        // Проверяем, нужна ли инициализация данных
+        if (roleService.getAllRoles().isEmpty()) {
+            System.out.println("Initializing roles and users...");
+
+            // Создаем роли
+            Role adminRole = new Role("ROLE_ADMIN");
+            Role userRole = new Role("ROLE_USER");
+
             roleService.save(adminRole);
-        }
-
-        Role userRole = roleService.getRoleByName("ROLE_USER");
-        if (userRole == null) {
-            userRole = new Role("ROLE_USER");
             roleService.save(userRole);
-        }
 
-        // Создаем админа, если его нет
-        User adminUser = userService.getUserByUsername("admin");
-        if (adminUser == null) {
-            adminUser = new User();
+            // Создаем администратора
+            User adminUser = new User();
             adminUser.setName("Admin");
             adminUser.setSureName("Adminov");
             adminUser.setUsername("admin");
@@ -53,12 +49,9 @@ public class DataInitializer implements CommandLineRunner {
             adminRoles.add(adminRole);
             adminUser.setRoles(adminRoles);
             userService.save(adminUser);
-        }
 
-        // Создаем обычного пользователя, если его нет
-        User regularUser = userService.getUserByUsername("user");
-        if (regularUser == null) {
-            regularUser = new User();
+            // Создаем обычного пользователя
+            User regularUser = new User();
             regularUser.setName("User");
             regularUser.setSureName("Userov");
             regularUser.setUsername("user");
@@ -67,6 +60,10 @@ public class DataInitializer implements CommandLineRunner {
             userRoles.add(userRole);
             regularUser.setRoles(userRoles);
             userService.save(regularUser);
+
+            System.out.println("Data initialization completed!");
+        } else {
+            System.out.println("Data already initialized. Skipping...");
         }
     }
 }
