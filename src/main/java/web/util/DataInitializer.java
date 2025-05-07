@@ -2,8 +2,8 @@ package web.util;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import web.model.Role;
 import web.model.User;
 import web.service.RoleService;
@@ -17,16 +17,15 @@ public class DataInitializer implements CommandLineRunner {
 
     private final UserService userService;
     private final RoleService roleService;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public DataInitializer(UserService userService, RoleService roleService, PasswordEncoder passwordEncoder) {
+    public DataInitializer(UserService userService, RoleService roleService) {
         this.userService = userService;
         this.roleService = roleService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
         // Проверяем, нужна ли инициализация данных
         if (roleService.getAllRoles().isEmpty()) {
@@ -39,14 +38,18 @@ public class DataInitializer implements CommandLineRunner {
             roleService.save(adminRole);
             roleService.save(userRole);
 
+            // Получаем роли из базы данных после сохранения
+            Role adminRoleFromDb = roleService.getRoleByName("ROLE_ADMIN");
+            Role userRoleFromDb = roleService.getRoleByName("ROLE_USER");
+
             // Создаем администратора
             User adminUser = new User();
             adminUser.setName("Admin");
             adminUser.setSureName("Adminov");
             adminUser.setUsername("admin");
-            adminUser.setPassword(passwordEncoder.encode("admin"));
+            adminUser.setPassword("admin"); // Пароль будет зашифрован в UserServiceImp
             Set<Role> adminRoles = new HashSet<>();
-            adminRoles.add(adminRole);
+            adminRoles.add(adminRoleFromDb);
             adminUser.setRoles(adminRoles);
             userService.save(adminUser);
 
@@ -55,9 +58,9 @@ public class DataInitializer implements CommandLineRunner {
             regularUser.setName("User");
             regularUser.setSureName("Userov");
             regularUser.setUsername("user");
-            regularUser.setPassword(passwordEncoder.encode("user"));
+            regularUser.setPassword("user"); // Пароль будет зашифрован в UserServiceImp
             Set<Role> userRoles = new HashSet<>();
-            userRoles.add(userRole);
+            userRoles.add(userRoleFromDb);
             regularUser.setRoles(userRoles);
             userService.save(regularUser);
 
