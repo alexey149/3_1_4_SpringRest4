@@ -1,5 +1,10 @@
 package web.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import web.dao.UserDao;
@@ -8,12 +13,15 @@ import web.model.User;
 import java.util.List;
 
 @Service
-public class UserServiceImp implements UserService {
+public class UserServiceImp implements UserService, UserDetailsService {
 
     private final UserDao userDao;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImp(UserDao userDao) {
+    @Autowired
+    public UserServiceImp(UserDao userDao, PasswordEncoder passwordEncoder) {
         this.userDao = userDao;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -22,21 +30,39 @@ public class UserServiceImp implements UserService {
         return userDao.getAllUsers();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public User getUserById(int id) {
         return userDao.getUserById(id);
     }
 
+    @Override
     @Transactional
     public void save(User user) {
+        // Шифруем пароль перед сохранением, если он не пустой
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
         userDao.save(user);
     }
 
+    @Override
     @Transactional
     public void update(User user) {
+        User existingUser = getUserById(user.getId());
+
+        // Если пароль не указан, сохраняем существующий
+        if (user.getPassword() == null || user.getPassword().isEmpty()) {
+            user.setPassword(existingUser.getPassword());
+        } else {
+            // Иначе шифруем новый пароль
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        }
+
         userDao.update(user);
     }
 
+    @Override
     @Transactional
     public void delete(int id) {
         userDao.delete(id);
@@ -46,5 +72,17 @@ public class UserServiceImp implements UserService {
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
         return userDao.getUserByUsername(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = getUserByUsername(username);
+
+        if (user == null) {
+            throw new UsernameNotFoundException("Пользователь с именем '" + username + "' не найден");
+        }
+
+        return user;
     }
 }
