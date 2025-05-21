@@ -58,13 +58,11 @@ public class RestApiController {
             User user = userService.getUserByUsername(username);
 
             if (user == null) {
-                System.out.println("Пользователь с именем '" + username + "' не найден в базе данных");
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
 
             return new ResponseEntity<>(user, HttpStatus.OK);
         } catch (Exception e) {
-            System.out.println("Ошибка при получении текущего пользователя: " + e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

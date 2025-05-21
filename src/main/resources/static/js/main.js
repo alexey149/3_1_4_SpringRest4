@@ -143,7 +143,6 @@ function loadCurrentUser() {
             }
         })
         .then(user => {
-            // Вывод для отладки
             console.log("Current user data:", JSON.stringify(user));
 
             if (user && user.id) {
@@ -160,21 +159,24 @@ function loadCurrentUser() {
                 </tr>`;
 
                 $('#user-info-tbody').html(userHtml);
+
+                // Показываем таблицу, скрываем сообщение об ошибке
                 $('#user-table').show();
                 $('#user-not-found').hide();
             } else {
+                // Скрываем таблицу, показываем сообщение об ошибке
                 $('#user-table').hide();
                 $('#user-not-found').show();
             }
         })
         .catch(error => {
             console.error('Error loading user information:', error);
+            // Скрываем таблицу, показываем сообщение об ошибке
             $('#user-table').hide();
             $('#user-not-found').show();
             $('#user-not-found p').text('Error loading user information: ' + error.message);
         });
 }
-
 // Функция загрузки ролей для форм
 function loadRoles() {
     fetch('/api/roles')
